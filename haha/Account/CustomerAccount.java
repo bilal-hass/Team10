@@ -1,6 +1,8 @@
 package Account;
 
-import java.util.Vector;
+import java.util.LinkedList;
+
+import Controller.DatabaseConnection;
 import Processing.Job;
 import Discount.Discount;
 
@@ -10,22 +12,42 @@ public class CustomerAccount {
 	private String _lastName;
 	private String _address;
 	private String _email;
-	private Integer _phoneNumber;
+	private String  _phoneNumber;
 	private String _valued;
-	public Vector<Job> _belongs_to = new Vector<Job>();
-	public JobHistory _unnamed_JobHistory_232;
-	public Discount _can_have;
+	public LinkedList<Job> jobs = new LinkedList<Job>();
+	public JobHistory jobHistory;
 
-	public DiscountPlan getDiscountPlan() {
-		throw new UnsupportedOperationException();
+	public Discount discount;
+
+	public Discount getDiscountPlan() {
+		return discount;
+	}
+
+	public void setDiscount(Discount discount) {
+		this.discount = discount;
 	}
 
 	public void setAgreedDiscount() {
-		throw new UnsupportedOperationException();
+		Discount discount = new Discount();
+		//set up discount
+		this.discount = discount;
 	}
 
 	public void editCustomerDetails() {
-		throw new UnsupportedOperationException();
+		DatabaseConnection databaseConnection = new DatabaseConnection();
+		databaseConnection.query(String.format(
+				"UPDATE CustomerAccounts " +
+						"SET Name = %s " +
+						"Address = %s " +
+						"Phone = %s" +
+						"AgreedDiscountType = %s" +
+						this._lastName + this._lastName,
+						this._address,
+						this._phoneNumber,
+						this.discount,
+						"WHERE CustomerID = " + this._customerId
+				)
+		);
 	}
 
 	public Integer getCustomerId() {
@@ -52,27 +74,27 @@ public class CustomerAccount {
 		this._lastName = aLastName;
 	}
 
-	public Varchar getAddress() {
+	public String getAddress() {
 		throw new UnsupportedOperationException();
 	}
 
-	public void setAddress(Varchar aAddress) {
+	public void setAddress(String aAddress) {
 		throw new UnsupportedOperationException();
 	}
 
-	public Varchar getEmail() {
+	public String getEmail() {
 		throw new UnsupportedOperationException();
 	}
 
-	public void setEmail(Varchar aEmail) {
+	public void setEmail(String aEmail) {
 		throw new UnsupportedOperationException();
 	}
 
-	public Integer getPhoneNumber() {
+	public String getPhoneNumber() {
 		return this._phoneNumber;
 	}
 
-	public void setPhoneNumber(Integer aPhoneNumber) {
+	public void setPhoneNumber(String aPhoneNumber) {
 		this._phoneNumber = aPhoneNumber;
 	}
 
@@ -85,6 +107,7 @@ public class CustomerAccount {
 	}
 
 	public CustomerAccount() {
-		throw new UnsupportedOperationException();
+		JobHistory jobHistory = new JobHistory();
+		Discount discount = new Discount();
 	}
 }
