@@ -21,9 +21,14 @@ public class Discount {
 		_discountPlanId=id;
 		_name=name;
 		_description = description;
+		_type = type;
 	}
 
 	public Float getPrice(Job job) {
 		return job.getPriceBeforeDiscount();
+	}
+
+	public DiscountTypes getType() {
+		return _type;
 	}
 }

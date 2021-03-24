@@ -29,7 +29,7 @@ public class FlexibleDiscount extends Discount {
 
 		_jobDiscounts = new ArrayList<FlexibleJobAmount>();
 		Connection conn = DBConnWrapper.getConnection();
-		String query = "SELECT FJA.StartPrice, FJA.EndPrice, FJA.Amount, FD.`JobType` FROM CustomerAccount AS C \n" +
+		String query = "SELECT FJA.StartPrice, FJA.EndPrice, FJA.Amount, FJA.JobType FROM CustomerAccount AS C \n" +
 				"INNER JOIN DiscountPlan AS DP ON C.DiscountPlan = DP.id\n" +
 				"INNER JOIN FlexibleDiscount AS FD ON DP.FlexibleDiscount = FD.id\n" +
 				"INNER JOIN FlexibleJobAmounts AS FJA ON FJA.FlexibleDiscount = FD.id\n" +
