@@ -1,21 +1,29 @@
 package Discount;
 
-import Account.CustomerAccount;
+import Account.*;
+import Processing.Job;
 
 public class Discount {
-	private double _amount;
-	private text _type;
-	public CustomerAccount _can_have;
+	public static enum DiscountTypes {
+		FIXED,
+		VARIABLE,
+		FLEXIBLE
+	};
 
-	public float getFlatDiscount(Object aFloat_Price) {
-		throw new UnsupportedOperationException();
+	private DiscountTypes _type;
+	private Integer _customerNo;
+	private Integer _discountPlanId;
+	private String _name;
+	private String _description;
+
+	public Discount(Integer customerNo, Integer id, String name, String description, DiscountTypes type) {
+		_customerNo=customerNo;
+		_discountPlanId=id;
+		_name=name;
+		_description = description;
 	}
 
-	public void setDiscount() {
-		throw new UnsupportedOperationException();
-	}
-
-	public Discount() {
-		throw new UnsupportedOperationException();
+	public Float getPrice(Job job) {
+		return job.getPriceBeforeDiscount();
 	}
 }
