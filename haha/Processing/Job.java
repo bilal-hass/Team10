@@ -55,18 +55,32 @@ public class Job{
     }
 
 
-    public Job(Integer id, CustomerAccount customer, String status, Boolean paid, Date start, Date completed, Integer type) {
+    public Job(Integer id, CustomerAccount customer) {
         _jobId = id;
         _customer = customer;
-        _status = status;
-        _paid = paid;
-        _startDate = start;
-        _completionDate = completed;
-        _jobType = type;
+
+        String query = "SELECT * FROM Job WHERE Job.`id` = " + id.toString() + ";";
+        Connection conn = DBConnWrapper.getConnection();
+
+        try {
+            ResultSet RS = conn.createStatement().executeQuery(query);
+            while (RS.next()) {
+                _status = RS.getString("Status");
+                _paid = RS.getBoolean("Paid");
+                _startDate = RS.getDate("StartDate");
+                _completionDate = RS.getDate("CompletionDate");
+                RS.getInt("CustomerNo");
+                _jobType = RS.getInt("JobType");
+            }
+        }
+        catch (SQLException e) {
+            e.printStackTrace();
+        }
+
         _tasks = new ArrayList<Task>();
 
-        String query = "SELECT JT.id, T.TaskType, JT.Order, JT.StartTime, JT.Completed FROM JobTasks AS JT INNER JOIN Task AS T ON T.TaskType = JT.TaskId WHERE JT.JobId = " + id.toString() + ";";
-        Connection conn = DBConnWrapper.getConnection();
+        query = "SELECT JT.id, T.TaskType, JT.Order, JT.StartTime, JT.Completed FROM JobTasks AS JT INNER JOIN Task AS T ON T.TaskType = JT.TaskId WHERE JT.JobId = " + id.toString() + ";";
+
         try {
             ResultSet RS = conn.createStatement().executeQuery(query);
             while (RS.next()) {
@@ -131,6 +145,15 @@ public class Job{
 
     public ArrayList<Task> getTasks() {
         return _tasks;
+    }
+
+    public Float getPriceBeforeDiscount() {
+        //THIS DOES NOT FACTOR DISCOUNTS, PLEASE DO NOT USE UNLESS TO CALCULATE PREDISCOUNT PRICE =)
+        Float price = 0.f;
+        for (Task t: _tasks) {
+            price += t.getPrice();
+        }
+        return price;
     }
 
 }
