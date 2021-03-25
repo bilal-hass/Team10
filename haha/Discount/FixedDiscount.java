@@ -11,8 +11,8 @@ public class FixedDiscount extends Discount {
 	private Integer _discountPlanId;
 	private Float _percentage;
 
-	FixedDiscount(Integer customerId, Integer id, String name, String description) {
-		super(customerId, id, name, description, DiscountTypes.FIXED);
+	FixedDiscount(Integer id, String name, String description) {
+		super(id, name, description, DiscountTypes.FIXED);
 		_discountPlanId = id;
 
 		Connection conn = DBConnWrapper.getConnection();
@@ -20,7 +20,7 @@ public class FixedDiscount extends Discount {
 		try {
 			ResultSet RS = conn.createStatement().executeQuery(query);
 			while (RS.next()) {
-				_percentage = RS.getFloat("FlatAmount");
+				_percentage = RS.getFloat("FlatDiscount");
 			}
 		}
 		catch (SQLException e) {

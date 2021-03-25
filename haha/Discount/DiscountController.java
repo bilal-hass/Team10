@@ -36,49 +36,70 @@ public class DiscountController {
 	}
 
 	//tested & works
-	public static void createFlatDiscountPlan(String _name, String _description, Float _amount) {
+	public static FixedDiscount createFixedDiscountPlan(String _name, String _description, Float _amount) {
 		String query = "INSERT INTO DiscountPlan(`Name`, `Description`, `Type`, `VariableDiscount`, `FlexibleDiscount`, `FlatDiscount`) VALUES\n"
 				+ "('"+_name+"', '" + _description + "', 'FIXED', NULL, NULL, " + _amount.toString() + ");";
 		ExecuteTrivialQuery(query);
+
+		Integer Id = getMaxId("DiscountPlan");
+		return new FixedDiscount(Id, _name, _description);
 	}
 
 	//tested & works
-	public static void createVariableDiscountPlan(String _name, String _description, ArrayList<TaskPercentPair> _rates) {
+	public static Discount createVariableDiscountPlan(String _name, String _description, ArrayList<TaskPercentPair> _rates) {
 
 		ExecuteTrivialQuery("INSERT INTO VariableDiscount() VALUES ()");
-		Integer Id = getMaxId("VariableDiscount");
-
-		StringBuilder SQLRatesBuilder = new StringBuilder();
-		for (TaskPercentPair TPP: _rates) {
-			SQLRatesBuilder.append("\n\t(").append(TPP.Amount.toString()).append(", ").append(Id.toString()).append(", ").append(TPP.TaskType.toString()).append("),");
-		}
-		String SQLRates = SQLRatesBuilder.toString();
-
-		ExecuteTrivialQuery("INSERT INTO VariableTaskAmounts(`Amount`, `VariableDiscount`, `TaskType`) VALUES" + SQLRates.substring(1, SQLRates.length()-1) +  ";");
+		Integer VariableDiscount_id = getMaxId("VariableDiscount");
 
 		ExecuteTrivialQuery("INSERT INTO DiscountPlan(`Name`, `Description`, `Type`, `VariableDiscount`, `FlexibleDiscount`, `FlatDiscount`) VALUES\n"
-				+ "('"+_name+"', '" + _description + "', 'VARIABLE', "+Id.toString()+", NULL, 0);");
+				+ "('"+_name+"', '" + _description + "', 'VARIABLE', "+VariableDiscount_id.toString()+", NULL, 0);");
+		Integer DiscountPlan_id = getMaxId("DiscountPlan");
+
+		VariableDiscount d = new VariableDiscount(DiscountPlan_id, _name, _description);
+		addVariableRates(d, _rates);
+
+		return d;
+	}
+
+	//tested & works
+	public static void addVariableRates(VariableDiscount d, ArrayList<TaskPercentPair> _rates) {
+		StringBuilder SQLRatesBuilder = new StringBuilder();
+		for (TaskPercentPair TPP: _rates) {
+			SQLRatesBuilder.append("\n\t(").append(TPP.Amount.toString()).append(", ").append(d.getVariableDiscountId().toString()).append(", ").append(TPP.TaskType.toString()).append("),");
+		}
+		String SQLRates = SQLRatesBuilder.toString();
+		ExecuteTrivialQuery("INSERT INTO VariableTaskAmounts(`Amount`, `VariableDiscount`, `TaskType`) VALUES" + SQLRates.substring(1, SQLRates.length()-1) +  ";");
+		d.UpdateDiscountValues();
 	}
 
 	//tested & works
 	public static void createFlexibleDiscountPlan(String _name, String _description, ArrayList<JobFlexibleData> _rates) {
 		ExecuteTrivialQuery("INSERT INTO FlexibleDiscount() VALUES ()");
-		Integer Id = getMaxId("FlexibleDiscount");
+		Integer FlexibleDiscount_Id = getMaxId("FlexibleDiscount");
 
+
+
+		ExecuteTrivialQuery("INSERT INTO DiscountPlan(`Name`, `Description`, `Type`, `VariableDiscount`, `FlexibleDiscount`, `FlatDiscount`) VALUES\n"
+				+ "('"+_name+"', '" + _description + "', 'VARIABLE', NULL, " + FlexibleDiscount_Id.toString() + ", 0);");
+		Integer DiscountPlan_Id = getMaxId("DiscountPlan");
+
+		FlexibleDiscount d = new FlexibleDiscount(DiscountPlan_Id, _name, _description);
+		addFlexibleRates(d, _rates);
+	}
+
+	//tested & works
+	public static void addFlexibleRates(FlexibleDiscount d, ArrayList<JobFlexibleData> _rates) {
 		ExecuteTrivialQuery("SET FOREIGN_KEY_CHECKS=0;");
-		//necessary due to bug with jdbc being retarded idk....
+		//necessary for some reason... works in mysql but not jdbc unless I have this.
 
 		StringBuilder SQLRates = new StringBuilder();
 		for (JobFlexibleData FJA: _rates) {
-			SQLRates.append("\n(").append(FJA.StartPrice.toString()).append(", ").append(FJA.EndPrice.toString()).append(", ").append(FJA.Amount.toString()).append(", ").append(Id.toString()).append(",").append(FJA.JobType.toString()).append("),");
+			SQLRates.append("\n(").append(FJA.StartPrice.toString()).append(", ").append(FJA.EndPrice.toString()).append(", ").append(FJA.Amount.toString()).append(", ").append(d.getFlexibleDiscountId().toString()).append(",").append(FJA.JobType.toString()).append("),");
 		}
 		String query = SQLRates.toString();
 		query = query.substring(1, query.length()-1);
 
 		ExecuteTrivialQuery("INSERT INTO FlexibleJobAmounts(`StartPrice`, `EndPrice`, `Amount`, `FlexibleDiscount`, `JobType`) VALUES" + query + ";");
-
-		ExecuteTrivialQuery("INSERT INTO DiscountPlan(`Name`, `Description`, `Type`, `VariableDiscount`, `FlexibleDiscount`, `FlatDiscount`) VALUES\n"
-				+ "('"+_name+"', '" + _description + "', 'VARIABLE', NULL, " + Id.toString() + ", 0);");
 
 		ExecuteTrivialQuery("SET FOREIGN_KEY_CHECKS=1;");
 	}
@@ -109,16 +130,16 @@ public class DiscountController {
 			e.printStackTrace();
 		}
 
-		discount = new Discount(customer.getId(), id, name, description, Discount.DiscountTypes.FIXED);
+		discount = new Discount(id, name, description, Discount.DiscountTypes.FIXED);
 
 		if (id != 0) {
 			switch (type) {
 				case "FIXED":
-					return new FixedDiscount(customer.getId(), id, name, description);
+					return new FixedDiscount(id, name, description);
 				case "FLEXIBLE":
-					return new FlexibleDiscount(customer.getId(), id, name, type);
+					return new FlexibleDiscount(id, name, type);
 				case "VARIABLE":
-					return new VariableDiscount(customer.getId(), id, name, type);
+					return new VariableDiscount(id, name, type);
 			}
 		}
 

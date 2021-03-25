@@ -2,6 +2,7 @@ package Discount;
 
 import DB.DBConnWrapper;
 import Processing.Job;
+import com.mysql.cj.x.protobuf.MysqlxCrud;
 
 import java.sql.Connection;
 import java.sql.ResultSet;
@@ -23,17 +24,37 @@ class FlexibleJobAmount {
 
 public class FlexibleDiscount extends Discount {
 	private Integer _discountPlanId;
+	private Integer _FlexibleDiscountId;
 	private ArrayList<FlexibleJobAmount> _jobDiscounts;
-	public FlexibleDiscount(Integer customerId, Integer id, String name, String description) {
-		super(customerId, id, name, description, DiscountTypes.FLEXIBLE);
+	public FlexibleDiscount(Integer id, String name, String description) {
+		super(id, name, description, DiscountTypes.FLEXIBLE);
 
 		_jobDiscounts = new ArrayList<FlexibleJobAmount>();
 		Connection conn = DBConnWrapper.getConnection();
-		String query = "SELECT FJA.StartPrice, FJA.EndPrice, FJA.Amount, FJA.JobType FROM CustomerAccount AS C \n" +
-				"INNER JOIN DiscountPlan AS DP ON C.DiscountPlan = DP.id\n" +
+		String query = "SELECT FD.id FROM DiscountPlan AS DP\n" +
+				"INNER JOIN FlexibleDiscount AS FD ON DP.FlexibleDiscount = FD.id\n" +
+				"WHERE DP.id = " + id +  ";";
+		try {
+			ResultSet RS = conn.createStatement().executeQuery(query);
+			while (RS.next()) {
+				_FlexibleDiscountId = RS.getInt("id");
+			}
+		}
+		catch (SQLException e) {
+			e.printStackTrace();
+		}
+
+		UpdateFlexibleRates();
+	}
+
+	public void UpdateFlexibleRates() {
+		_jobDiscounts = new ArrayList<FlexibleJobAmount>();
+
+		Connection conn = DBConnWrapper.getConnection();
+		String query = "SELECT FJA.StartPrice, FJA.EndPrice, FJA.Amount, FJA.JobType FROM DiscountPlan AS DP\n" +
 				"INNER JOIN FlexibleDiscount AS FD ON DP.FlexibleDiscount = FD.id\n" +
 				"INNER JOIN FlexibleJobAmounts AS FJA ON FJA.FlexibleDiscount = FD.id\n" +
-				"WHERE C.No = " + customerId +  ";";
+				"WHERE DP.id = " + getId() +  ";";
 		try {
 			ResultSet RS = conn.createStatement().executeQuery(query);
 			while (RS.next()) {
@@ -47,6 +68,10 @@ public class FlexibleDiscount extends Discount {
 		catch (SQLException e) {
 			e.printStackTrace();
 		}
+	}
+
+	public Integer getFlexibleDiscountId() {
+		return _FlexibleDiscountId;
 	}
 
 	@Override
