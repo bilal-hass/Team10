@@ -1,26 +1,33 @@
 package Report;
 
-public class Report {
-	private String _text;
-	private int _reportID;
+import Controller.DatabaseConnection;
 
-	public String getText() {
-		return this._text;
-	}
+class Report {
+    String _text;
+    private int _reportID;
+	DatabaseConnection databaseConnection;
 
-	public void setText(String aText) {
-		this._text = aText;
-	}
+    String getText() {
+        return this._text;
+    }
 
-	public int getReportID() {
-		return this._reportID;
-	}
+    void setText(String aText) {
+        this._text = aText;
+    }
 
-	public void setReportID(int aReportID) {
-		this._reportID = aReportID;
-	}
+    int getReportID() {
+        return this._reportID;
+    }
 
-	public Report() {
-		throw new UnsupportedOperationException();
-	}
+    void setReportID(int aReportID) {
+        this._reportID = aReportID;
+    }
+
+    void generate() {
+        throw new UnsupportedOperationException();
+    }
+
+    Report() {
+        throw new UnsupportedOperationException();
+    }
 }

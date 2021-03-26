@@ -4,9 +4,9 @@ import Controller.Date;
 
 public interface ReportInterface {
 
-	public void generateShiftReport(Date aDateOfShift);
+	void generateShiftReport(Date adateOfShift);
 
-	public void generateIndividualReport(integer aCustomerId, date aStartDate, date aEndDate);
+	void generateIndividualReport(int aCustomerId, Date aStartDate, Date aEndDate);
 
-	public void generatePerformanceReport(integer aUserId, date aStartDate, date aEndDate);
+	void generatePerformanceReport(int aUserId, Date aStartDate, Date aEndDate);
 }

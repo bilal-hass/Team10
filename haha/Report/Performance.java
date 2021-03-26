@@ -1,23 +1,26 @@
 package Report;
 
+import Controller.DatabaseConnection;
 import Users.User;
 
-public class Performance extends Report {
+class Performance extends Report {
 	private User _staff;
 
-	public User getStaff() {
+	User getStaff() {
 		return this._staff;
 	}
 
-	public void setStaff(User aStaff) {
+	void setStaff(User aStaff) {
 		this._staff = aStaff;
 	}
 
-	public Performance() {
-		throw new UnsupportedOperationException();
+	@Override
+	void generate() {
+		databaseConnection.query(
+				"SLELECT * FROM Shifts WHERE StaffID = " + _staff.getName());
 	}
 
-	public Performance(Object aParameter) {
-		throw new UnsupportedOperationException();
+	Performance() {
+		databaseConnection = new DatabaseConnection();
 	}
 }

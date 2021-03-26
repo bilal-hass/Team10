@@ -2,21 +2,25 @@ package Report;
 
 import Controller.Date;
 
-public class ReportImplementation implements generateShiftReport {
+public class ReportImplementation implements ReportInterface {
 
-	public void generateShiftReport(Date aDateOfShift) {
-		throw new UnsupportedOperationException();
-	}
+    private ReportController reportController = new ReportController();
 
-	public void generatePerformanceReport(integer aUserId, date aStartDate, date aEndDate) {
-		throw new UnsupportedOperationException();
-	}
+    @Override
+    public void generateShiftReport(Date adateOfShift) {
+        reportController.createReport((byte) 1);
+    }
 
-	public void generateIndividualReport(integer aCustomerId, date aStartDate, date aEndDate) {
-		throw new UnsupportedOperationException();
-	}
+    @Override
+    public void generateIndividualReport(int aCustomerId, Date aStartDate, Date aEndDate) {
+        reportController.createReport((byte) 2);
+    }
 
-	public ReportImplementation() {
-		throw new UnsupportedOperationException();
-	}
+    @Override
+    public void generatePerformanceReport(int aUserId, Date aStartDate, Date aEndDate) {
+        reportController.createReport((byte) 3);
+    }
+
+    public ReportImplementation() {
+    }
 }

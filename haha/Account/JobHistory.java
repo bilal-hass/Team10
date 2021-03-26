@@ -8,9 +8,9 @@ import java.util.List;
 
 public class JobHistory {
 
-	List<String> history = new ArrayList<>();
+	private List<String> history = new ArrayList<>();
 
-	public List<String> getJobsFromDatabase(int CustomerID) {
+	List<String> getJobsFromDatabase(int CustomerID) {
 		DatabaseConnection databaseConnection = new DatabaseConnection();
 		String jobs = databaseConnection.query(
 				"SELECT * FROM job " +
@@ -21,11 +21,11 @@ public class JobHistory {
 		return history;
 	}
 
-	public void editJobHistory(int CustomerID) {
+	void editJobHistory(int CustomerID) {
 		if (history.isEmpty()) getJobsFromDatabase(CustomerID);
 		// GUI to select job
 	}
 
-	public JobHistory() {
+	JobHistory() {
 	}
 }

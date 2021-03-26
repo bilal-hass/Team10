@@ -1,37 +1,43 @@
 package Report;
 
+import Controller.DatabaseConnection;
 import Controller.Date;
 
-public class Shift extends Report {
+class Shift extends Report {
 	private Date _dateOfShift;
-	private Time _totalEffort;
-	private TIme _timeTaken;
+	private Date _totalEffort;
+	private Date _timeTaken;
 
-	public Date getDateOfShift() {
+	Date getDateOfShift() {
 		return this._dateOfShift;
 	}
 
-	public void setDateOfShift(Date aDateOfShift) {
+	void setDateOfShift(Date aDateOfShift) {
 		this._dateOfShift = aDateOfShift;
 	}
 
-	public Time getTotalEffort() {
+	Date getTotalEffort() {
 		return this._totalEffort;
 	}
 
-	public void setTotalEffort(Time aTotalEffort) {
+	void setTotalEffort(Date aTotalEffort) {
 		this._totalEffort = aTotalEffort;
 	}
 
-	public TIme getTimeTaken() {
+	Date getTimeTaken() {
 		return this._timeTaken;
 	}
 
-	public void setTimeTaken(TIme aTimeTaken) {
+	void setTimeTaken(Date aTimeTaken) {
 		this._timeTaken = aTimeTaken;
 	}
 
-	public Shift() {
-		throw new UnsupportedOperationException();
+	@Override
+	public void generate() {
+		_text = databaseConnection.query("SELECT * FROM Shifts");
+	}
+
+	Shift() {
+		databaseConnection = new DatabaseConnection();
 	}
 }
