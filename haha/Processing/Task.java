@@ -1,6 +1,7 @@
 package Processing;
 
 import DB.DBConnWrapper;
+import Users.User;
 
 import java.sql.Connection;
 import java.sql.Date;
@@ -11,11 +12,11 @@ import java.util.HashMap;
 import java.util.Map;
 
 public class Task {
-    static Map<Integer, String> TaskTypeNameMap = new HashMap<Integer, String>();
-    static Map<Integer, String> TaskTypeDescriptionMap = new HashMap<Integer, String>();
-    static Map<Integer, String> TaskTypeLocationMap = new HashMap<Integer, String>();
-    static Map<Integer, Float> TaskTypePriceMap = new HashMap<Integer, Float>();
-    static Map<Integer, Integer> TaskTypeDurationMap = new HashMap<Integer, Integer>();
+    static Map<Integer, String> TaskTypeNameMap = new HashMap<>();
+    static Map<Integer, String> TaskTypeDescriptionMap = new HashMap<>();
+    static Map<Integer, String> TaskTypeLocationMap = new HashMap<>();
+    static Map<Integer, Float> TaskTypePriceMap = new HashMap<>();
+    static Map<Integer, Integer> TaskTypeDurationMap = new HashMap<>();
     //this is kind of scuffed.... but it saves a lot of SQL calls....
 
     static {
@@ -54,18 +55,51 @@ public class Task {
     private Float _price;
     private Integer _durationMinutes;
     private Date _startTime;
+    private Date _endTime;
 
-    public Task(Integer id, Integer type, Integer order, Boolean completed, Date startTime) {
+    public Task(Integer id) {
         _id = id;
-        _type = type;
-        _order = order;
-        _completed = completed;
-        _name = TaskTypeNameMap.get(type);
-        _description = TaskTypeDescriptionMap.get(type);
-        _location = TaskTypeLocationMap.get(type);
-        _price = TaskTypePriceMap.get(type);
-        _durationMinutes = TaskTypeDurationMap.get(type);
-        _startTime = startTime;
+
+        if (getTaskCount(id).intValue() == 0) {
+            throw new RuntimeException("Task.new bad id, no SQL entry found, please use Controller.createNewTask");
+        }
+
+        Connection conn = DBConnWrapper.getConnection();
+        String query = "SELECT `Order`, `StartTime`, `TaskId` AS TaskType, `JobId`, `Completed`, `CompletionStaff`, `CompletionTime` FROM JobTasks\n"
+                + "WHERE `id` = " + id.toString() + ";";
+        try {
+            ResultSet RS = conn.createStatement().executeQuery(query);
+            while (RS.next()) {
+                _order = RS.getInt("Order");
+                _type = RS.getInt("TaskType");
+                _completed = RS.getBoolean("Completed");
+                _name = TaskTypeNameMap.get(_type);
+                _description = TaskTypeDescriptionMap.get(_type);
+                _location = TaskTypeLocationMap.get(_location);
+                _endTime = RS.getDate("CompletionTime");
+                _price = TaskTypePriceMap.get(_type);
+                _durationMinutes = TaskTypeDurationMap.get(_type);
+            }
+        }
+        catch (SQLException e) {
+            e.printStackTrace();
+            return;
+        }
+
+
+    }
+
+    private Integer getTaskCount(Integer id) {
+        Connection conn = DBConnWrapper.getConnection();
+        String query = "SELECT COUNT(*) FROM JobTasks WHERE id = " + id.toString() + ";";
+        try {
+            ResultSet RS = conn.createStatement().executeQuery(query);
+            if (RS.next()) { return RS.getInt("COUNT(*)"); }
+        }
+        catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return 0;
     }
 
     private void UpdateJobTasksSQL(String Column, Object Value) {
@@ -98,8 +132,10 @@ public class Task {
         UpdateJobTasksSQL("StartTime", _startTime);
     }
 
-    public void completeTask() {
+    public void completeTask(User completedBy) {
+        //TODO: add StaffMember Id for complete task.
         _completed = true;
-        UpdateJobTasksSQL("Completed", _completed);
+        UpdateJobTasksSQL("Completed", true);
+        UpdateJobTasksSQL("CompletionStaff", completedBy.getId());
     }
 }

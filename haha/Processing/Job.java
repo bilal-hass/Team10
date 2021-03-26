@@ -2,6 +2,8 @@ package Processing;
 
 import Account.CustomerAccount;
 import DB.DBConnWrapper;
+import Users.User;
+
 import java.sql.Connection;
 import java.sql.Date;
 import java.sql.ResultSet;
@@ -67,8 +69,6 @@ public class Job{
             while (RS.next()) {
                 _status = RS.getString("Status");
                 _paid = RS.getBoolean("Paid");
-                _startDate = RS.getDate("StartDate");
-                _completionDate = RS.getDate("CompletionDate");
                 RS.getInt("CustomerNo");
                 _jobType = RS.getInt("JobType");
             }
@@ -79,17 +79,13 @@ public class Job{
 
         _tasks = new ArrayList<Task>();
 
-        query = "SELECT JT.id, T.TaskType, JT.Order, JT.StartTime, JT.Completed FROM JobTasks AS JT INNER JOIN Task AS T ON T.TaskType = JT.TaskId WHERE JT.JobId = " + id.toString() + ";";
+        query = "SELECT JT.id FROM JobTasks AS JT WHERE JT.JobId = " + id.toString() + ";";
 
         try {
             ResultSet RS = conn.createStatement().executeQuery(query);
             while (RS.next()) {
                 Integer t_id = RS.getInt("id");
-                Integer t_order = RS.getInt("Order");
-                Date t_startTime = RS.getDate("StartTime");
-                Boolean t_completed = RS.getBoolean("Completed");
-                Integer t_type = RS.getInt("TaskType");
-                Task t = new Task(t_id,t_type,t_order,t_completed,t_startTime);
+                Task t = new Task(t_id);
                 _tasks.add(t);
             }
         } catch (SQLException e) {
@@ -102,8 +98,6 @@ public class Job{
     public CustomerAccount getCustomer() { return _customer; }
     public String getStatus() { return _status; }
     public Boolean getPaid() { return _paid; }
-    public Date getStartDate() { return _startDate; }
-    public Date getCompletionDate() { return _completionDate; }
     public Integer getType() { return _jobType; }
     public String getTypeString() { return JobTypes.get(_jobType); }
 
@@ -111,19 +105,21 @@ public class Job{
         _status = status;
         UpdateSQL("Status", status);
     }
-    public void setPaid(Boolean paid) {
-        _paid = paid;
-        UpdateSQL("Paid", paid);
+
+    public Boolean isDoable() {
+        CustomerAccount c = getCustomer();
+        if (getStatus().equals("CONFIRMED") || !isPaid() && c.isValuedCustomer()) {
+            return true;
+        }
+        return false;
     }
-    private void setStartDate(Date date) {
-        _startDate = date;
-        UpdateSQL("StartDate", date);
-        //needs testing
+
+    public void confirmJob() {
+        setStatus("CONFIRMED");
     }
-    private void setCompletionDate(Date date) {
-        _completionDate = date;
-        UpdateSQL("CompletionDate", date);
-        //needs testing
+
+    public Boolean isPaid() {
+        return !getStatus().equals("UNCONFIRMED");
     }
 
     public void startJob() {
@@ -131,16 +127,14 @@ public class Job{
             System.out.println("Started unpaid job ID " + getId().toString() + " check Customer is Valued!");
         }
         setStatus("ACTIVE");
-        setStartDate((java.sql.Date)Date.from(Instant.now()));
     }
 
-    public void completeJob() {
+    public void completeJob(User CompletedBy) {
         setStatus("COMPLETE");
         for (Task t: _tasks) {
-            t.completeTask();
+            t.completeTask(CompletedBy);
             //sanity complete all tasks when job completes.
         }
-        setCompletionDate((java.sql.Date)Date.from(Instant.now()));
     }
 
     public ArrayList<Task> getTasks() {
