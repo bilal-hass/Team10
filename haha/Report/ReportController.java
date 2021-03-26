@@ -1,10 +1,10 @@
 package Report;
 
-import java.util.Vector;
+import java.util.LinkedList;
 import Report.Report;
 
 public class ReportController {
-	public Vector<Report> _creates = new Vector<Report>();
+	public LinkedList<Report> _creates = new LinkedList<Report>();
 
 	public void createReport() {
 		throw new UnsupportedOperationException();

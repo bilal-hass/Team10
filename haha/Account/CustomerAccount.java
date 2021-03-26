@@ -13,9 +13,9 @@ public class CustomerAccount {
 	private String _address;
 	private String _email;
 	private String  _phoneNumber;
-//	private String _valued;
-	public LinkedList<Job> jobs = new LinkedList<>();
-	JobHistory jobHistory;
+	private String _valued;
+	public LinkedList<Job> jobs = new LinkedList<Job>();
+	public JobHistory jobHistory;
 
 	public Discount discount;
 
@@ -23,16 +23,17 @@ public class CustomerAccount {
 		return discount;
 	}
 
-	public void setDiscount(int intDis) {
-		this.discount = new Discount();
+	public void setDiscount(Discount discount) {
+		this.discount = discount;
 	}
 
-	void setAgreedDiscount() {
-        //set up discount
-		this.discount = new Discount();
+	public void setAgreedDiscount() {
+		Discount discount = new Discount();
+		//set up discount
+		this.discount = discount;
 	}
 
-	void editCustomerDetails() {
+	public void editCustomerDetails() {
 		// GUI to change deets
 		DatabaseConnection databaseConnection = new DatabaseConnection();
 		databaseConnection.query(String.format(
@@ -50,11 +51,11 @@ public class CustomerAccount {
 		);
 	}
 
-	Integer getCustomerId() {
+	public Integer getCustomerId() {
 		return this._customerId;
 	}
 
-	void setCustomerId(Integer aCustomerId) {
+	public void setCustomerId(Integer aCustomerId) {
 		this._customerId = aCustomerId;
 	}
 
@@ -62,7 +63,7 @@ public class CustomerAccount {
 		return this._firstName;
 	}
 
-	void setFirstName(String aFirstName) {
+	public void setFirstName(String aFirstName) {
 		this._firstName = aFirstName;
 	}
 
@@ -70,43 +71,43 @@ public class CustomerAccount {
 		return this._lastName;
 	}
 
-	void setLastName(String aLastName) {
+	public void setLastName(String aLastName) {
 		this._lastName = aLastName;
 	}
 
 	public String getAddress() {
-		return this._address;
+		throw new UnsupportedOperationException();
 	}
 
-	void setAddress(String aAddress) {
-		this._address = aAddress;
+	public void setAddress(String aAddress) {
+		throw new UnsupportedOperationException();
 	}
 
 	public String getEmail() {
-		return this._email;
+		throw new UnsupportedOperationException();
 	}
 
 	public void setEmail(String aEmail) {
-		this._email = aEmail;
+		throw new UnsupportedOperationException();
 	}
 
 	public String getPhoneNumber() {
 		return this._phoneNumber;
 	}
 
-	void setPhoneNumber(String aPhoneNumber) {
+	public void setPhoneNumber(String aPhoneNumber) {
 		this._phoneNumber = aPhoneNumber;
 	}
 
-//	public String getValued() {
-//		return this._valued;
-//	}
-//
-//	public void setValued(String aValued) {
-//		this._valued = aValued;
-//	}
+	public String getValued() {
+		return this._valued;
+	}
 
-	CustomerAccount() {
+	public void setValued(String aValued) {
+		this._valued = aValued;
+	}
+
+	public CustomerAccount() {
 		JobHistory jobHistory = new JobHistory();
 		Discount discount = new Discount();
 	}

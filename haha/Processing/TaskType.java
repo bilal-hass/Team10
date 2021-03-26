@@ -1,7 +1,7 @@
 package Processing;
 
 import Controller.Date;
-import java.util.Vector;
+import java.util.LinkedList;
 import Processing.Task;
 
 public class TaskType {
@@ -10,7 +10,7 @@ public class TaskType {
 	private float _price;
 	private Date _duration;
 	private String _department;
-	public Vector<Task> _defines = new Vector<Task>();
+	public LinkedList<Task> _defines = new LinkedList<Task>();
 
 	public String getRoom() {
 		return this._room;

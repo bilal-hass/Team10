@@ -1,10 +1,10 @@
 package Processing;
 
-import java.util.Vector;
+import java.util.LinkedList;
 import Processing.Task;
 
 public class TaskCollection {
-	public Vector<Task> _stores = new Vector<Task>();
+	public LinkedList<Task> _stores = new LinkedList<Task>();
 
 	public void addTask() {
 		throw new UnsupportedOperationException();
