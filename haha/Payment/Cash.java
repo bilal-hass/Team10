@@ -3,13 +3,16 @@ package Payment;
 import Controller.Date;
 
 public class Cash extends Payment {
-	private Date _dateOfPayment;
-
-	public Date getDateOfPayment() {
-		return this._dateOfPayment;
-	}
-
-	public void setDateOfPayment(Date aDateOfPayment) {
-		this._dateOfPayment = aDateOfPayment;
-	}
+    @Override
+    public void write() {
+        databaseConnection.query(
+                "INSERT INTO cashPayment VALUES " +
+                        String.format("%d, %s,",
+                                getJobID(), _dateOfPayment.toString()
+                        )
+        );
+        databaseConnection.query(
+                "UPDATE jobs SET isPaid = true WHERE jobID = " + getJobID()
+        );
+    }
 }

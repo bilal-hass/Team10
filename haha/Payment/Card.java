@@ -30,4 +30,18 @@ public class Card extends Payment {
 	public void setCardType(String aCardType) {
 		this._cardType = aCardType;
 	}
+
+	@Override
+	public void write() {
+		databaseConnection.query(
+				"INSERT INTO cardPayment VALUES " +
+						String.format("%d, %s, %d, %s, %s",
+								getJobID(), _dateOfPayment.toString(), _digits,
+								_expiryDate.toString(), _cardType
+						)
+		);
+		databaseConnection.query(
+				"UPDATE jobs SET isPaid = true WHERE jobID = " + getJobID()
+		);
+	}
 }

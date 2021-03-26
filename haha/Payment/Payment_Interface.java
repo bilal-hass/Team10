@@ -1,10 +1,10 @@
 package Payment;
 
-public interface Payment_Interface {
+interface Payment_Interface {
 
-	public void makePayement(integer aJobId);
+	void makePayement(int aJobId);
 
-	public integer getJobById(integer aCustomerId);
+	int getJobById(int aCustomerId);
 
-	public integer getCustomerById();
+	int getCustomerById(int customerID);
 }
