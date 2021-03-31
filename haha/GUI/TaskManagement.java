@@ -5,6 +5,17 @@
  */
 package GUI;
 
+import DB.DBConnWrapper;
+import GUI.TableWrappers.TaskTableModel;
+import GUI.TableWrappers.TaskTypeTableModel;
+
+import javax.swing.*;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
+import java.sql.Connection;
+import java.sql.ResultSet;
+import java.sql.SQLException;
+
 /**
  *
  * @author amirharvey
@@ -47,7 +58,7 @@ public class TaskManagement extends javax.swing.JFrame {
         AddNewButton = new javax.swing.JButton();
         jLabel1 = new javax.swing.JLabel();
         jScrollPane1 = new javax.swing.JScrollPane();
-        jList1 = new javax.swing.JList<>();
+        jList1 = new javax.swing.JTable();
 
         setDefaultCloseOperation(javax.swing.WindowConstants.DISPOSE_ON_CLOSE);
 
@@ -268,12 +279,19 @@ public class TaskManagement extends javax.swing.JFrame {
         jLabel1.setText("TASK TYPES:");
 
         jList1.setFont(new java.awt.Font("Lucida Grande", 0, 14)); // NOI18N
-        jList1.setModel(new javax.swing.AbstractListModel<String>() {
-            String[] strings = { "Item 1", "Item 2", "Item 3", "Item 4", "Item 5" };
-            public int getSize() { return strings.length; }
-            public String getElementAt(int i) { return strings[i]; }
-        });
+        jList1.setModel(new TaskTypeTableModel());
         jScrollPane1.setViewportView(jList1);
+        Connection conn = DBConnWrapper.getConnection();
+        String query = "SELECT * FROM TASK";
+        try {
+            ResultSet RS = conn.createStatement().executeQuery(query);
+            while (RS.next()) {
+                ((TaskTypeTableModel) jList1.getModel()).addElement(RS.getString("TaskName"), RS.getString("TaskDescription"), RS.getString("Location"), RS.getFloat("Price"), RS.getInt("Duration"));
+            }
+        }
+        catch (SQLException e) {
+            e.printStackTrace();
+        }
 
         javax.swing.GroupLayout jPanel1Layout = new javax.swing.GroupLayout(jPanel1);
         jPanel1.setLayout(jPanel1Layout);
@@ -289,7 +307,7 @@ public class TaskManagement extends javax.swing.JFrame {
                             .addComponent(BackUpDatabase)
                             .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
                             .addComponent(AddNewButton))
-                        .addComponent(jScrollPane1, javax.swing.GroupLayout.PREFERRED_SIZE, 357, javax.swing.GroupLayout.PREFERRED_SIZE)))
+                        .addComponent(jScrollPane1, javax.swing.GroupLayout.PREFERRED_SIZE, 600, javax.swing.GroupLayout.PREFERRED_SIZE)))
                 .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
             .addComponent(jPanel2, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
         );
@@ -303,7 +321,7 @@ public class TaskManagement extends javax.swing.JFrame {
                         .addGap(95, 95, 95)
                         .addComponent(jLabel1)
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
-                        .addComponent(jScrollPane1, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                        .addComponent(jScrollPane1, javax.swing.GroupLayout.PREFERRED_SIZE, 300, 300)
                         .addGap(46, 46, 46)
                         .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
                             .addComponent(AddNewButton)
@@ -320,6 +338,21 @@ public class TaskManagement extends javax.swing.JFrame {
             layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addComponent(jPanel1, javax.swing.GroupLayout.PREFERRED_SIZE, 580, Short.MAX_VALUE)
         );
+
+        BackUpDatabase.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                String targetName = ((TaskTypeTableModel)jList1.getModel()).getValueAt(jList1.getSelectedRow(), 0);
+                ((TaskTypeTableModel)jList1.getModel()).removeRow(jList1.getSelectedRow());
+                String query = "DELETE FROM Task WHERE TaskName = '" + targetName + "'";
+                try {
+                    DBConnWrapper.getConnection().createStatement().executeUpdate(query);
+                }
+                catch (SQLException q) {
+                    q.printStackTrace();
+                }
+            }
+        });
 
         pack();
     }// </editor-fold>//GEN-END:initComponents
@@ -446,44 +479,21 @@ public class TaskManagement extends javax.swing.JFrame {
 
     private void AddNewButtonMouseClicked(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_AddNewButtonMouseClicked
         
-        NewTask obj = new
-        NewTask();
+        NewTask obj = new NewTask(this);
         obj.setVisible(true);
     }//GEN-LAST:event_AddNewButtonMouseClicked
 
-    /**
-     * @param args the command line arguments
-     */
-    public static void main(String args[]) {
-        /* Set the Nimbus look and feel */
-        //<editor-fold defaultstate="collapsed" desc=" Look and feel setting code (optional) ">
-        /* If Nimbus (introduced in Java SE 6) is not available, stay with the default look and feel.
-         * For details see http://download.oracle.com/javase/tutorial/uiswing/lookandfeel/plaf.html 
-         */
+    public void addElement(String TaskName, String TaskDescription, String Location, Float Price, Integer Duration) {
+        ((TaskTypeTableModel) jList1.getModel()).addElement(TaskName, TaskDescription, Location, Price, Duration);
+        String query = "INSERT INTO Task(TaskName, TaskDescription, Location, Price, Duration) VALUES\n"
+                + "('" + TaskName + "', '" + TaskDescription + "', '" + Location + "', " + Price + ", " + Duration + ")";
+        Connection conn = DBConnWrapper.getConnection();
         try {
-            for (javax.swing.UIManager.LookAndFeelInfo info : javax.swing.UIManager.getInstalledLookAndFeels()) {
-                if ("Nimbus".equals(info.getName())) {
-                    javax.swing.UIManager.setLookAndFeel(info.getClassName());
-                    break;
-                }
-            }
-        } catch (ClassNotFoundException ex) {
-            java.util.logging.Logger.getLogger(TaskManagement.class.getName()).log(java.util.logging.Level.SEVERE, null, ex);
-        } catch (InstantiationException ex) {
-            java.util.logging.Logger.getLogger(TaskManagement.class.getName()).log(java.util.logging.Level.SEVERE, null, ex);
-        } catch (IllegalAccessException ex) {
-            java.util.logging.Logger.getLogger(TaskManagement.class.getName()).log(java.util.logging.Level.SEVERE, null, ex);
-        } catch (javax.swing.UnsupportedLookAndFeelException ex) {
-            java.util.logging.Logger.getLogger(TaskManagement.class.getName()).log(java.util.logging.Level.SEVERE, null, ex);
+            conn.createStatement().executeUpdate(query);
         }
-        //</editor-fold>
-
-        /* Create and display the form */
-        java.awt.EventQueue.invokeLater(new Runnable() {
-            public void run() {
-                new TaskManagement().setVisible(true);
-            }
-        });
+        catch (SQLException e) {
+            e.printStackTrace();
+        }
     }
 
     // Variables declaration - do not modify//GEN-BEGIN:variables
@@ -503,7 +513,7 @@ public class TaskManagement extends javax.swing.JFrame {
     private javax.swing.JButton ProcessPaymentButton;
     private javax.swing.JLabel jLabel1;
     private javax.swing.JLabel jLabel4;
-    private javax.swing.JList<String> jList1;
+    private javax.swing.JTable jList1;
     private javax.swing.JPanel jPanel1;
     private javax.swing.JPanel jPanel2;
     private javax.swing.JPanel jPanel4;

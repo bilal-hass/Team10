@@ -5,7 +5,16 @@
  */
 package GUI;
 
+import Account.CustomerAccount;
+import DB.DBConnWrapper;
+import Report.ReportController;
 import Users.UserController;
+
+import java.sql.*;
+import java.time.Instant;
+import java.time.LocalDateTime;
+import java.time.ZoneId;
+import java.time.ZoneOffset;
 
 /**
  *
@@ -239,6 +248,8 @@ public class Home extends javax.swing.JFrame {
         if (!UserController.currentUser.hasRolePermissions(4)) {
             MyTasksButton.setVisible(false);
         }
+
+        ReportController.checkAutomatics();
 
 
         pack();

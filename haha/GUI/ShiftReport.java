@@ -87,8 +87,8 @@ public class ShiftReport extends javax.swing.JFrame {
 
     private void GenerateButtonMouseClicked(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_GenerateButtonMouseClicked
         ReportController.createShiftReport();
-        new ManageCustomer().setVisible(true);
         this.dispose();
+
     }//GEN-LAST:event_GenerateButtonMouseClicked
 
 

@@ -279,7 +279,7 @@ public class ReportManagement extends javax.swing.JFrame {
         });
 
         AutoReportButton.setFont(new java.awt.Font("Lucida Grande", 0, 14)); // NOI18N
-        AutoReportButton.setText("CONFIGURE AUTO REPORTTING");
+        AutoReportButton.setText("CONFIGURE AUTO REPORTING");
         AutoReportButton.addMouseListener(new java.awt.event.MouseAdapter() {
             public void mouseClicked(java.awt.event.MouseEvent evt) {
                 AutoReportButtonMouseClicked(evt);

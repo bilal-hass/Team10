@@ -5,6 +5,13 @@
  */
 package GUI;
 
+import DB.DBConnWrapper;
+import Report.ReportController;
+
+import java.sql.Connection;
+import java.sql.ResultSet;
+import java.sql.SQLException;
+
 /**
  *
  * @author amirharvey
@@ -118,47 +125,41 @@ public class AutoReport extends javax.swing.JFrame {
             .addComponent(jPanel1, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
         );
 
+        Connection conn = DBConnWrapper.getConnection();
+        String query = "SELECT * FROM AutoReportRate WHERE id = 1";
+
+        try {
+            ResultSet RS = conn.createStatement().executeQuery(query);
+            while (RS.next()) {
+                CustomerDropDown.setSelectedIndex(ReportController.getAutoDropDownIndex(RS.getString("Customer")));
+                StaffDropDown.setSelectedIndex(ReportController.getAutoDropDownIndex(RS.getString("Staff")));
+                ShiftDropDown.setSelectedIndex(ReportController.getAutoDropDownIndex(RS.getString("Shift")));
+            }
+        }
+        catch (SQLException e) {
+            e.printStackTrace();
+        }
+
         pack();
     }// </editor-fold>//GEN-END:initComponents
 
     private void GenerateButtonMouseClicked(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_GenerateButtonMouseClicked
-       
-    }//GEN-LAST:event_GenerateButtonMouseClicked
+        String CustomerUpdateRate = CustomerDropDown.getItemAt(CustomerDropDown.getSelectedIndex());
+        String StaffUpdateRate = StaffDropDown.getItemAt(StaffDropDown.getSelectedIndex());
+        String ShiftUpdateRate = ShiftDropDown.getItemAt(ShiftDropDown.getSelectedIndex());
 
-    /**
-     * @param args the command line arguments
-     */
-    public static void main(String args[]) {
-        /* Set the Nimbus look and feel */
-        //<editor-fold defaultstate="collapsed" desc=" Look and feel setting code (optional) ">
-        /* If Nimbus (introduced in Java SE 6) is not available, stay with the default look and feel.
-         * For details see http://download.oracle.com/javase/tutorial/uiswing/lookandfeel/plaf.html 
-         */
+        Connection conn = DBConnWrapper.getConnection();
+        String query = "UPDATE AutoReportRate\n"
+                + "SET Customer = '" + CustomerUpdateRate + "', Staff = '" + StaffUpdateRate + "', Shift = '" + ShiftUpdateRate + "'";
         try {
-            for (javax.swing.UIManager.LookAndFeelInfo info : javax.swing.UIManager.getInstalledLookAndFeels()) {
-                if ("Nimbus".equals(info.getName())) {
-                    javax.swing.UIManager.setLookAndFeel(info.getClassName());
-                    break;
-                }
-            }
-        } catch (ClassNotFoundException ex) {
-            java.util.logging.Logger.getLogger(AutoReport.class.getName()).log(java.util.logging.Level.SEVERE, null, ex);
-        } catch (InstantiationException ex) {
-            java.util.logging.Logger.getLogger(AutoReport.class.getName()).log(java.util.logging.Level.SEVERE, null, ex);
-        } catch (IllegalAccessException ex) {
-            java.util.logging.Logger.getLogger(AutoReport.class.getName()).log(java.util.logging.Level.SEVERE, null, ex);
-        } catch (javax.swing.UnsupportedLookAndFeelException ex) {
-            java.util.logging.Logger.getLogger(AutoReport.class.getName()).log(java.util.logging.Level.SEVERE, null, ex);
+            conn.createStatement().executeUpdate(query);
         }
-        //</editor-fold>
+        catch (SQLException e) {
+            e.printStackTrace();
+        }
 
-        /* Create and display the form */
-        java.awt.EventQueue.invokeLater(new Runnable() {
-            public void run() {
-                new AutoReport().setVisible(true);
-            }
-        });
-    }
+        this.dispose();
+    }//GEN-LAST:event_GenerateButtonMouseClicked
 
     // Variables declaration - do not modify//GEN-BEGIN:variables
     private javax.swing.JComboBox<String> CustomerDropDown;

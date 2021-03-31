@@ -146,10 +146,8 @@ public class ReportController {
 
         HashMap<LocalDateTime, ShiftRow> Shifts = new HashMap<>();
 
-        System.out.println("0");
-
         try {
-            for (long i = 0; i < 7; i++) {
+            for (long i = 1; i < 8; i++) {
                 LocalDateTime shiftStart = startTime.plusDays(i);
                 LocalDateTime shiftEnd = shiftStart.plusDays(1);
                 Timestamp startStamp = new Timestamp(shiftStart.toInstant(ZoneId.of("Europe/London").getRules().getOffset(LocalDateTime.now())).toEpochMilli());
@@ -157,6 +155,7 @@ public class ReportController {
                 String query = "SELECT * FROM JobTasks INNER JOIN Task ON JobTasks.TaskId = Task.TaskType WHERE StartTime BETWEEN '" + startStamp.toString() + "' AND '" + endStamp.toString() + "' AND Completed = 1";
                 ResultSet RS = conn.createStatement().executeQuery(query);
                 ShiftRow Shift = new ShiftRow(startStamp.toString());
+                System.out.println(query);
 
                 while (RS.next()) {
                     Timestamp taskStart = RS.getTimestamp("StartTime");
@@ -165,7 +164,6 @@ public class ReportController {
                     Long elapsed = (taskEnd.getTime() - taskStart.getTime());
                     Long newval = Shift.LocationTimes.getOrDefault(Location, new Long(0)) + elapsed;
                     Shift.LocationTimes.put(Location, newval);
-
                 }
                 Shifts.put(shiftStart, Shift);
             }
@@ -174,7 +172,7 @@ public class ReportController {
             e.printStackTrace();
         }
 
-        System.out.println("1");
+        String content = "";
 
         for (HashMap.Entry<LocalDateTime, ShiftRow> entry : Shifts.entrySet()) {
             String top, bottom;
@@ -186,17 +184,162 @@ public class ReportController {
                 String Location = c.getKey();
                 Long Duration = c.getValue()/1000;
 
-                top = top + Location + " | ";
+                top = top + Location;
 
                 Integer hours = (int)(Math.floor(Duration / 3600)%24);
                 Integer minutes = (int)(Math.floor(Duration / 60)%60);
 
                 bottom = bottom + hours.toString() + "h:" + minutes.toString() + "m:" + ((Long)(Duration%60)).toString() + "s | ";
-
+                top = top + (" ").repeat( Math.max(1, bottom.length() - top.length() - 3)) + "| ";
             }
-            System.out.println(top);
-            System.out.println(bottom);
+            content += top + "\n";
+            content += bottom + "\n\n";
         }
+
+        String Prename = savePath + "Shift/ShiftReport";
+        String Filename = makeUniqueFilename(Prename, ".txt");
+        File f = writeNewReport(Filename, content);
+
+        if (Desktop.isDesktopSupported()) {
+            try {
+                Desktop.getDesktop().edit(f);
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+        }
+
+    }
+
+    public static Integer getAutoDropDownIndex(String s) {
+        switch (s) {
+
+            case "MONTHLY":
+                return 1;
+            case "YEARLY":
+                return 2;
+            default: //WEEKLY DEFAULTS
+                return 0;
+        }
+    }
+
+    public static void checkAutomatics() {
+        Connection conn = DBConnWrapper.getConnection();
+        String query = "SELECT * FROM AutoReportRate WHERE id = 1";
+
+        String CustomerRate = "", StaffRate = "", AutoRate = "";
+
+
+        try {
+            ResultSet RS = conn.createStatement().executeQuery(query);
+            while (RS.next()) {
+                CustomerRate = RS.getString("Customer");
+                StaffRate = RS.getString("Staff");
+                AutoRate = RS.getString("Shift");
+            }
+        }
+        catch (SQLException e) {
+            e.printStackTrace();
+        }
+
+        Timestamp reportTime = Timestamp.from(Instant.now());
+        LocalDateTime current = LocalDateTime.now();
+        LocalDateTime startTime = LocalDateTime.of(current.getYear(), current.getMonth(), current.getDayOfMonth(), 0,0,0,0).minusDays(7);
+        Timestamp startTimestamp = Timestamp.from(startTime.toInstant(ZoneId.of("Europe/London").getRules().getOffset(LocalDateTime.now())));
+        query = "SELECT * FROM CustomerAccount WHERE LastReportTime <= '" + startTimestamp.toString() + "'";
+
+        //ASSUME WEEKLY...
+        if (CustomerRate == "MONTHLY") {
+            startTime = LocalDateTime.of(current.getYear(), current.getMonth(), current.getDayOfMonth(), 0,0,0,0).minusMonths(1);
+            startTimestamp = Timestamp.from(startTime.toInstant(ZoneId.of("Europe/London").getRules().getOffset(LocalDateTime.now())));
+            query = "SELECT * FROM CustomerAccount WHERE LastReportTime <= '" + startTimestamp.toString() + "'";
+        }
+        else if (CustomerRate == "YEARLY") {
+            startTime = LocalDateTime.of(current.getYear(), current.getMonth(), current.getDayOfMonth(), 0,0,0,0).minusYears(1);
+            startTimestamp = Timestamp.from(startTime.toInstant(ZoneId.of("Europe/London").getRules().getOffset(LocalDateTime.now())));
+            query = "SELECT * FROM CustomerAccount WHERE LastReportTime <= '" + startTimestamp.toString() + "'";
+        }
+
+        try {
+            ResultSet RS = conn.createStatement().executeQuery(query);
+            while (RS.next()) {
+                Integer id = RS.getInt("No");
+                CustomerAccount c = new CustomerAccount(id);
+                ReportController.createCustomerReport(c, startTime.toInstant(ZoneId.of("Europe/London").getRules().getOffset(LocalDateTime.now())));
+                query = "UPDATE CustomerAccount SET LastReportTime = '" + reportTime.toString() + "' WHERE No = " + id.toString();
+                conn.createStatement().executeUpdate(query);
+            }
+        }
+        catch (SQLException e) {
+            e.printStackTrace();
+        }
+
+        //reset to 7 day check assuming weekly
+        startTime = LocalDateTime.of(current.getYear(), current.getMonth(), current.getDayOfMonth(), 0,0,0,0).minusDays(7);
+        startTimestamp = Timestamp.from(startTime.toInstant(ZoneId.of("Europe/London").getRules().getOffset(LocalDateTime.now())));
+        query = "SELECT * FROM StaffAccount WHERE LastReportTime <= '" + startTimestamp.toString() + "'";
+
+        if (StaffRate == "MONTHLY") {
+            startTime = LocalDateTime.of(current.getYear(), current.getMonth(), current.getDayOfMonth(), 0,0,0,0).minusMonths(1);
+            startTimestamp = Timestamp.from(startTime.toInstant(ZoneId.of("Europe/London").getRules().getOffset(LocalDateTime.now())));
+            query = "SELECT * FROM StaffAccount WHERE LastReportTime <= '" + startTimestamp.toString() + "'";
+        }
+        else if (StaffRate == "YEARLY") {
+            startTime = LocalDateTime.of(current.getYear(), current.getMonth(), current.getDayOfMonth(), 0,0,0,0).minusYears(1);
+            startTimestamp = Timestamp.from(startTime.toInstant(ZoneId.of("Europe/London").getRules().getOffset(LocalDateTime.now())));
+            query = "SELECT * FROM StaffAccount WHERE LastReportTime <= '" + startTimestamp.toString() + "'";
+        }
+
+        try {
+            ResultSet RS = conn.createStatement().executeQuery(query);
+            while (RS.next()) {
+                Integer id = RS.getInt("id");
+                User c = new User(id);
+                ReportController.createStaffReport(c, startTime.toInstant(ZoneId.of("Europe/London").getRules().getOffset(LocalDateTime.now())));
+                query = "UPDATE StaffAccount SET LastReportTime = '" + reportTime.toString() + "' WHERE id = " + id.toString();
+                conn.createStatement().executeUpdate(query);
+            }
+        }
+        catch (SQLException e) {
+            e.printStackTrace();
+        }
+
+        query = "DELETE FROM AutoReportRate WHERE id != 1";
+        try {
+            conn.createStatement().executeUpdate(query);
+        }
+        catch (SQLException e) {
+            e.printStackTrace();
+        }
+
+        //reset to 7 day check assuming weekly
+        startTime = LocalDateTime.of(current.getYear(), current.getMonth(), current.getDayOfMonth(), 0,0,0,0).minusDays(7);
+        startTimestamp = Timestamp.from(startTime.toInstant(ZoneId.of("Europe/London").getRules().getOffset(LocalDateTime.now())));
+        query = "SELECT COUNT(*) FROM AutoReportRate WHERE LastAutoShiftReport <= '" + startTimestamp.toString() + "'";
+        if (AutoRate == "MONTHLY") {
+            startTime = LocalDateTime.of(current.getYear(), current.getMonth(), current.getDayOfMonth(), 0,0,0,0).minusMonths(1);
+            startTimestamp = Timestamp.from(startTime.toInstant(ZoneId.of("Europe/London").getRules().getOffset(LocalDateTime.now())));
+            query = "SELECT COUNT(*) FROM AutoReportRate WHERE LastAutoShiftReport <= '" + startTimestamp.toString() + "'";
+        }
+        else if (AutoRate  == "YEARLY") {
+            startTime = LocalDateTime.of(current.getYear(), current.getMonth(), current.getDayOfMonth(), 0,0,0,0).minusYears(1);
+            startTimestamp = Timestamp.from(startTime.toInstant(ZoneId.of("Europe/London").getRules().getOffset(LocalDateTime.now())));
+            query = "SELECT COUNT(*) FROM AutoReportRate WHERE LastAutoShiftReport <= '" + startTimestamp.toString() + "'";
+        }
+
+        try {
+            ResultSet RS = conn.createStatement().executeQuery(query);
+            while (RS.next()) {
+                if (RS.getInt("COUNT(*)") > 0) {
+                    createShiftReport();
+                    query = "UPDATE AutoReportRate SET LastAutoShiftReport = '" + reportTime.toString() + "' WHERE id = 1";
+                    conn.createStatement().executeUpdate(query);
+                }
+            }
+        }
+        catch (SQLException e) {
+            e.printStackTrace();
+        }
+
 
     }
 
