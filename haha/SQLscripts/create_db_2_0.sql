@@ -1,0 +1,161 @@
+DROP DATABASE cw_db;
+CREATE DATABASE cw_db;
+USE cw_db;
+
+DROP TABLE IF EXISTS StaffAccount;
+CREATE TABLE StaffAccount (
+	id INT NOT NULL PRIMARY KEY AUTO_INCREMENT,
+    `Role` INT,
+    Username VARCHAR(32) NOT NULL,
+    `Password` VARCHAR(32) NOT NULL,
+    `Name` VARCHAR(64) NOT NULL,
+    Address VARCHAR(128),
+    Department VARCHAR(64),
+    LastReportTime DATE DEFAULT '2000-01-01'
+);
+
+DROP TABLE IF EXISTS JobTypes;
+CREATE TABLE JobTypes (
+	id INT NOT NULL PRIMARY KEY AUTO_INCREMENT,
+    JobType VARCHAR(255)
+);
+
+DROP TABLE IF EXISTS Task;
+CREATE TABLE Task (
+	TaskType INT NOT NULL PRIMARY KEY AUTO_INCREMENT,
+    TaskName VARCHAR(255),
+    TaskDescription VARCHAR(512),
+	Location VARCHAR(255),
+    Price FLOAT,
+    Duration INTEGER
+);
+
+DROP TABLE IF EXISTS VariableDiscount;
+CREATE TABLE VariableDiscount (
+	id INTEGER NOT NULL PRIMARY KEY AUTO_INCREMENT
+);
+
+DROP TABLE IF EXISTS VariableTaskAmounts;
+CREATE TABLE VariableTaskAmounts (
+	id INTEGER NOT NULL PRIMARY KEY AUTO_INCREMENT,
+    Amount FLOAT,
+    VariableDiscount INTEGER NOT NULL,
+    TaskType INTEGER NOT NULL,
+    CONSTRAINT FK_VTVariableDiscount FOREIGN KEY (VariableDiscount) REFERENCES VariableDiscount(id) ON DELETE CASCADE,
+    CONSTRAINT FK_VTTaskType FOREIGN KEY (TaskType) REFERENCES Task(TaskType) ON DELETE CASCADE
+);
+
+DROP TABLE IF EXISTS FlexibleDiscount;
+CREATE TABLE FlexibleDiscount (
+	id INTEGER NOT NULL PRIMARY KEY AUTO_INCREMENT
+);
+
+DROP TABLE IF EXISTS FlexibleJobAmounts;
+CREATE TABLE FlexibleJobAmounts (
+	id INTEGER NOT NULL PRIMARY KEY AUTO_INCREMENT,
+    StartPrice FLOAT,
+    EndPrice FLOAT,
+    Amount FLOAT,
+    JobType INT,
+    FlexibleDiscount INT NOT NULL,
+    CONSTRAINT FK_FlexibleAmounts FOREIGN KEY (FlexibleDiscount) REFERENCES FlexibleDiscount(id) ON DELETE CASCADE,
+    CONSTRAINT FK_FJAJobType FOREIGN KEY (JobType) REFERENCES JobTypes(id) ON DELETE CASCADE
+);
+
+DROP TABLE IF EXISTS DiscountPlan;
+CREATE TABLE DiscountPlan (
+	id INTEGER NOT NULL PRIMARY KEY AUTO_INCREMENT,
+    Name VARCHAR(255),
+    Description VARCHAR(255),
+    Type VARCHAR(30),
+    FlatDiscount FLOAT NOT NULL,
+    VariableDiscount INT,
+    FlexibleDiscount INT,
+    CONSTRAINT FK_VariableDiscount FOREIGN KEY (VariableDiscount) REFERENCES VariableDiscount(id) ON DELETE CASCADE,
+    CONSTRAINT FK_FlexibleDiscount FOREIGN KEY (FlexibleDiscount) REFERENCES FlexibleDiscount(id) ON DELETE CASCADE
+);
+
+DROP TABLE IF EXISTS CustomerAccount;
+CREATE TABLE CustomerAccount (
+	No INTEGER NOT NULL PRIMARY KEY AUTO_INCREMENT,
+    Name VARCHAR(30),
+    Address VARCHAR(255),
+    Phone VARCHAR(20),
+    Valued BOOLEAN,
+    Email VARCHAR(255),
+    DiscountPlan INT NULL,
+    LastReportTime DATE DEFAULT '2000-01-01',
+    CONSTRAINT FK_DiscountPlan FOREIGN KEY (DiscountPlan) REFERENCES DiscountPlan(id)
+);
+
+DROP TABLE IF EXISTS Job;
+CREATE TABLE Job (
+	id INTEGER NOT NULL PRIMARY KEY AUTO_INCREMENT,
+    Status VARCHAR(20),
+    Paid BOOLEAN NULL DEFAULT 0,
+    StartDate DATETIME,
+    CompletionDate DATETIME,
+    CustomerNo INT NOT NULL,
+    JobType INT NOT NULL,
+    Urgency INT NULL DEFAULT 1,
+    CONSTRAINT FK_JobCustomer FOREIGN KEY (CustomerNo) REFERENCES CustomerAccount(No),
+    CONSTRAINT FK_JobJobType FOREIGN KEY (JobType) REFERENCES JobTypes(id)
+);
+
+DROP TABLE IF EXISTS JobTasks;
+CREATE TABLE JobTasks (
+	id INTEGER NOT NULL PRIMARY KEY AUTO_INCREMENT,
+    `Order` SMALLINT,
+    StartTime DATETIME,
+    Completed BOOLEAN,
+    TaskId INT NOT NULL,
+    JobId INT NOT NULL,
+    CompletionStaff INT,
+    CompletionTime DATETIME,
+    CONSTRAINT FK_JobTasksTask FOREIGN KEY (TaskId) REFERENCES Task(TaskType),
+    CONSTRAINT FK_JobTasksJob FOREIGN KEY (JobId) REFERENCES Job(id),
+    CONSTRAINT FK_StaffAccount FOREIGN KEY (CompletionStaff) REFERENCES StaffAccount(id)
+);
+
+DROP TABLE IF EXISTS SpecialInstruction;
+CREATE TABLE SpecialInstruction (
+	id INTEGER NOT NULL PRIMARY KEY AUTO_INCREMENT,
+    Body VARCHAR(1024),
+    Job INTEGER,
+    CONSTRAINT FK_SIJob FOREIGN KEY (Job) REFERENCES Job(id)
+);
+
+DROP TABLE IF EXISTS Payment;
+CREATE TABLE Payment (
+	id INTEGER NOT NULL PRIMARY KEY AUTO_INCREMENT,
+    Job INTEGER,
+    Amount FLOAT,
+    PaymentOption VARCHAR(5),
+    CardNumber VARCHAR(20),
+    CONSTRAINT FK_PaymentJob FOREIGN KEY (Job) REFERENCES Job(id)
+);
+
+DROP TABLE IF EXISTS CardDetails;
+CREATE TABLE CardDetails (
+	id INTEGER NOT NULL PRIMARY KEY AUTO_INCREMENT,
+    CardNumber VARCHAR(30),
+    CustomerNo INTEGER,
+    CONSTRAINT FK_CardDetailsCustomerAccount FOREIGN KEY (CustomerNo) REFERENCES CustomerAccount(No)
+);
+
+DROP TABLE IF EXISTS AutoReportRate;
+CREATE TABLE AutoReportRate (
+	id INTEGER NOT NULL PRIMARY KEY AUTO_INCREMENT,
+    Customer VARCHAR(10),
+    Staff VARCHAR(10),
+    Shift VARCHAR(10)
+);
+
+DROP TABLE IF EXISTS AutoReport;
+CREATE TABLE AutoReport (
+	id INTEGER NOT NULL PRIMARY KEY AUTO_INCREMENT,
+    ReportType VARCHAR(10),
+    Time DATETIME
+);
+
+    

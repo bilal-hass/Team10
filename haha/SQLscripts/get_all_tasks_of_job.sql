@@ -1,0 +1,1 @@
+SELECT JT.id, T.TaskType, JT.Order, JT.StartTime, JT.Completed FROM JobTasks AS JT INNER JOIN Task AS T ON T.TaskType = JT.TaskId WHERE JT.JobId = 1;

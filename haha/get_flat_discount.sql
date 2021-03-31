@@ -1,0 +1,1 @@
+SELECT C.`Name`, C.`DiscountPlan`, DP.`Type`, DP.`Description` AS `DiscountDesc`, NULL AS `VDTaskType` , NULL AS `ReductionFactor`, NULL AS `TaskName`, DP.`FlatDiscount`  FROM CustomerAccount as C INNER JOIN DiscountPlan AS DP ON C.DiscountPlan = DP.id;
