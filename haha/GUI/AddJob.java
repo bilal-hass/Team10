@@ -68,7 +68,7 @@ public class AddJob extends javax.swing.JFrame {
         Integer jobType = JobTypeDropDown.getSelectedIndex()+1;
 
         Job j = Controller.createNewJob(SelectedCustomer, jobType, TaskTypes);
-        j.setUrgency(UrgencyDropDown.getSelectedIndex()+1);
+        j.setUrgency(UrgencyDropDown.getSelectedIndex());
 
         if ( (!specialInstructions.equals("SPECIAL INSTRUCTIONS:")) && (!specialInstructions.isEmpty()) ) {
             Controller.createSpecialInstruction(specialInstructions, j);

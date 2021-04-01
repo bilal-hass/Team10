@@ -65,7 +65,7 @@ public class DiscountController {
 
 
 		ExecuteTrivialQuery("INSERT INTO DiscountPlan(`Name`, `Description`, `Type`, `VariableDiscount`, `FlexibleDiscount`, `FlatDiscount`) VALUES\n"
-				+ "('"+_name+"', '" + _description + "', 'VARIABLE', NULL, " + FlexibleDiscount_Id.toString() + ", 0);");
+				+ "('"+_name+"', '" + _description + "', 'FLEIXLBE', NULL, " + FlexibleDiscount_Id.toString() + ", 0);");
 		Integer DiscountPlan_Id = DBConnWrapper.getMaxId("DiscountPlan");
 
 		FlexibleDiscount d = new FlexibleDiscount(DiscountPlan_Id, _name, _description);

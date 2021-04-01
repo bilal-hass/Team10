@@ -30,9 +30,9 @@ class UserRowWrapper {
                         return "OfficeManager";
                     case 2:
                         return "ShiftManager";
-                    case 3:
-                        return "Technician";
                     case 4:
+                        return "Technician";
+                    case 3:
                         return "Receptionist";
                     default:
                         return "bad column";

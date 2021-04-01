@@ -426,7 +426,7 @@ public class StaffManagement extends javax.swing.JFrame {
         jLabel8.setText("ROLE:");
 
         RoleDropDown.setFont(new java.awt.Font("Lucida Grande", 0, 14)); // NOI18N
-        RoleDropDown.setModel(new javax.swing.DefaultComboBoxModel<>(new String[] { "OfficeManager", "ShiftManager", "Technician", "Receptionist" }));
+        RoleDropDown.setModel(new javax.swing.DefaultComboBoxModel<>(new String[] { "OfficeManager", "ShiftManager", "Receptionist", "Technician" }));
 
         DeleteButton.setFont(new java.awt.Font("Lucida Grande", 0, 14)); // NOI18N
         DeleteButton.setText("DELETE");

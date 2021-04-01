@@ -237,9 +237,12 @@ public class Home extends javax.swing.JFrame {
             .addComponent(jPanel1, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
         );
 
+        System.out.println(UserController.currentUser.getRole());
+
         if (!UserController.currentUser.hasRolePermissions(2)) {
             AdminButton.setVisible(false);
         }
+
         if (!UserController.currentUser.hasRolePermissions(3)) {
             AddJobButton.setVisible(false);
             NewCustomerButton.setVisible(false);
